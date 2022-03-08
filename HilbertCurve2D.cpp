@@ -1,5 +1,4 @@
 #include "HilbertCurve2D.h"
-#include <limits> /*numeric limits*/
 #include <stdexcept> /*runtime_error*/
 
 HilbertCurve2D::HilbertCurve2D(int _order)
@@ -12,6 +11,9 @@ HilbertCurve2D::HilbertCurve2D(int _order)
 unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 {
 	//TODO: drawing explaining algorithm for ter presentation
+
+
+	// verify if x, y are valid coords: if not throw error?
 
 	unsigned int index = 0;
 
@@ -27,8 +29,8 @@ unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 
 		/* Transformations:
 		* 00->00
-		* 01->11
-		* 10->01
+		* 01->01
+		* 10->11
 		* 11->10
 		*/
 
@@ -40,13 +42,12 @@ unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 			y = tmp;
 			}
 			break;
-		case 1:
-			quadrant = 1;
+		case 1: //quadrant = 1
 			break;
 		case 2:
 			{unsigned int tmp = x;
-			x = ((1 << (order + 1)) - 1) - y;
-			y = ((1 << (order + 1)) - 1) - tmp;
+			x = ((1 << (i + 1)) - 1) - y;
+			y = ((1 << (i + 1)) - 1) - tmp;
 			}
 			quadrant = 3;
 			break;
@@ -55,9 +56,56 @@ unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 			break;
 		default:
 			throw std::runtime_error("unexpected behavior");
-		}
+		} // endswitch
 		index = index | quadrant;
-	}
+	} //endfor
 	return index;
+}
+
+void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigned int& y)
+{
+	x = 0;
+	y = 0;
+
+	for (int i = 0; i <= order; i++)
+	{
+		// quadrant = index1.index0 => quadrant in {00,01,10,11}
+		unsigned int quadrant = 0;
+		quadrant = index & 3;
+
+		/* Transformations:
+		* 00->00
+		* 01->01
+		* 11->10
+		* 10->11
+		*/
+
+		switch (quadrant)
+		{
+		case 0:
+			{unsigned int tmp = x;
+			x = y;
+			y = tmp;
+			}
+			break;
+		case 1:
+			y = y | (1 << i);
+			break;
+		case 2:
+			x = x | (1 << i);
+			y = y | (1 << i);
+			break;
+		case 3:
+			x = x | (1 << i);
+			{unsigned int tmp = x;
+			x = ((1 << (i + 1)) - 1) - y;
+			y = ((1 << (i + 1)) - 1) - tmp;
+			}
+			break;
+		default:
+			throw std::runtime_error("unexpected behavior");
+		} // endswitch
+		index = index >> 2;
+	} //endfor
 }
 
