@@ -119,3 +119,16 @@ unsigned int morton_Hilbert(unsigned int zorder, unsigned k){
 	}
 	return hilbert;
 }
+
+
+static private unsigned pattern_de_base [4] [4] = {
+	{0,1,3,2},
+	{0,3,1,2},
+	{2,3,1,0},
+	{2,1,3,0}};
+
+static private unsigned configuration [4] [4] = {
+	{1,0,3,0},
+	{0,2,1,1},
+	{2,1,2,3},
+	{3,3,0,2}};
