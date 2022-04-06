@@ -36,27 +36,3 @@ private:
 	int order{ 0 };
 };
 
-
-
-unsigned pattern_de_base [4] [4] = {
-	{0,1,3,2},
-	{0,3,1,2},
-	{2,3,1,0},
-	{2,1,3,0}};
-
-unsigned configuration [4] [4] = {
-	{1,0,3,0},
-	{0,2,1,1},
-	{2,1,2,3},
-	{3,3,0,2}};
-
-unsigned int morton_Hilbert(unsigned int zorder, unsigned k){
-	unsigned config = 0;
-	unsigned int hilbert = 0;
-	for (int i=k-1; i>=0; i--){
-		unsigned quadrant = zorder>>(2*i) & 3;
-		hilbert  = hilbert<<2 | base_pattern[config][quadrant];
-		config = configuration[config][quadrant];
-	}
-	return hilbert;
-}
