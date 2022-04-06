@@ -109,3 +109,13 @@ void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigne
 	} //endfor
 }
 
+unsigned int morton_Hilbert(unsigned int zorder, unsigned k){
+	unsigned config = 0;
+	unsigned int hilbert = 0;
+	for (int i=k-1; i>=0; i--){
+		unsigned quadrant = zorder>>(2*i) & 3;
+		hilbert  = hilbert<<2 | base_pattern[config][quadrant];
+		config = configuration[config][quadrant];
+	}
+	return hilbert;
+}
