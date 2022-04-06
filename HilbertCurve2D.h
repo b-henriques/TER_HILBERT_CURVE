@@ -34,3 +34,12 @@ private:
 	int order{ 0 };
 };
 
+
+#include <pybind11/pybind.h>
+
+namespace py = pybind11;
+
+PYBIND11_MODULE(example, m) {
+	py::class_<Nomdelaclasse>(m, "Nomdelaclasse")
+		.def("nomfonction", &NomClasse::NomFonction);
+	}
