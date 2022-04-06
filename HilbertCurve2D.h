@@ -29,6 +29,8 @@ public:
 	HilbertCurve2D(int _order);
 	//destructor
 	~HilbertCurve2D() = default;
+	
+	unsigned int morton_Hilbert(unsigned int zorder, unsigned k);
 
 private:
 	int order{ 0 };
