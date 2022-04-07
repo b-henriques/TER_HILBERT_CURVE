@@ -52,3 +52,19 @@ plt.ylabel('y')         # Nom de la grandeur en ordonnée
 plt.grid()              # Ajout d'une grille
 plt.show()              # Affichage
 
+
+
+
+//  py::class_<gmds::Mesh>(m, "Mesh")
+            .def(py::init<const gmds::MeshModel&>())
+            .def("getNbNodes", &gmds::Mesh::getNbNodes)
+            .def("getNbEdges", &gmds::Mesh::getNbEdges)
+            .def("getNbFaces", &gmds::Mesh::getNbFaces)
+            .def("getNbRegions", &gmds::Mesh::getNbRegions)
+            .def("getNode", &gmds::Mesh::get<gmds::Node>)
+            .def("getEdge", &gmds::Mesh::get<gmds::Edge>)
+            .def("getFace", &gmds::Mesh::get<gmds::Face>)
+            .def("getRegion", &gmds::Mesh::get<gmds::Region>)
+            .def("newIntVariableNode", [](gmds::Mesh& AThis, std::string &AName) {
+                     return AThis.getOrCreateVariable<int, gmds::GMDS_NODE>("AName");
+                 });
