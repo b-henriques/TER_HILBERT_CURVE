@@ -57,6 +57,7 @@ protected:
 	void checkHilberIndex(uint64_t hi);
 
 
+
 private:
 	
 	static constexpr uint32_t base_pattern[4][4] = {
@@ -74,3 +75,11 @@ private:
 	};
 };
 
+
+
+/*#include <pybind11/pybind.h>
+PYBIND11_MODULE(example, m) {
+	py::class_<Nomdelaclasse>(m, "Nomdelaclasse")
+		.def("nomfonction", &NomClasse::NomFonction);
+	}
+*/
