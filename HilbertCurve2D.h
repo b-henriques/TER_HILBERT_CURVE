@@ -1,4 +1,7 @@
 #pragma once
+#include <cstdint>
+#include "Point2D.h"
+
 class HilbertCurve2D
 {
 	// inspired by https://en.wikipedia.org/wiki/Hilbert_curve
@@ -6,40 +9,66 @@ class HilbertCurve2D
 	// HilbertCurve2D represents a pseudo-Hilbert Curve of order n, mapping from 2d to 1d
 	// order must be specified at object creation
 	// we assume 0,0 pos at bottom left corner
-	/* initial order = 0  ==> 4 squares
+	/* initial order = 1  ==> 4 squares
 	*   ____ ____
-	*  | 01 | 10 |
+	*  | 11 | 10 |
 	*  |____|____|
-	*  | 00 | 11 |
+	*  | 00 | 01 |
 	*  |____|____|
-	* 
-	* order n => 2^(n+1) * 2^(n+1) squares
+	*
+	* order n => 2^(n) * 2^(n) squares
 	*/
-	/* maximum order = 15, 1d index is an unsigned int(we assume 32 bits) so
-	* (order+1)*2 = 32 => order = 15
+	/* maximum order = 16, 1d index is an unsigned int(we assume 32 bits) so
+	* (order)*2 = 32 => order = 16
 	*/
 public:
-	//gives hilbert index of point x,y
-	unsigned int coords_to_index(unsigned int x, unsigned int y);
+	//gives hilbert index of cell x,y
+	uint64_t coords_to_hilbertindex(uint32_t x, uint32_t y);
 
 	//gives x,y of hilbert index i
-	void index_to_coord(unsigned int index, unsigned int &x, unsigned int &y);
+	void hilbertindex_to_coord(uint64_t index, uint32_t& x, uint32_t& y);
+
+	//gives morton index of cell x,y
+	uint64_t coords_to_mortonindex(uint32_t x, uint32_t y);
+
+	//gives cell coordinates x,y of morton index i
+	void mortonindex_to_coord(uint64_t index, uint32_t& x, uint32_t& y);
+
+	//gives hilbert index from morton index
+	uint64_t mortonToHilbert(uint64_t zorder);
+
+	virtual Point2D get_mappedPoint(Point2D point)=0;
+	virtual uint64_t get_MortonIndex(Point2D point)=0;
+	virtual uint64_t get_HilbertIndex(Point2D point)=0;
+	virtual std::vector<Point2D> get_points_from_hilbertindex(uint64_t hilbertindex) = 0;
 
 	//constructors
-	HilbertCurve2D(int _order);
+	HilbertCurve2D(uint32_t _order);
 	//destructor
 	~HilbertCurve2D() = default;
 
+
+protected:
+	uint32_t order{ 1 };
+
+	void checkXY(uint32_t x, uint32_t y);
+	void checkHilberIndex(uint64_t hi);
+
+
 private:
-	int order{ 0 };
+	
+	static constexpr uint32_t base_pattern[4][4] = {
+	{0,1,3,2},
+	{0,3,1,2},
+	{2,3,1,0},
+	{2,1,3,0}
+	};
+
+	static constexpr uint32_t configuration[4][4] = {
+		{1,0,3,0},
+		{0,2,1,1},
+		{2,1,2,3},
+		{3,3,0,2}
+	};
 };
 
-
-#include <pybind11/pybind.h>
-
-namespace py = pybind11;
-
-PYBIND11_MODULE(example, m) {
-	py::class_<Nomdelaclasse>(m, "Nomdelaclasse")
-		.def("nomfonction", &NomClasse::NomFonction);
-	}

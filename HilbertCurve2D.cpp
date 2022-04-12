@@ -1,29 +1,45 @@
 #include "HilbertCurve2D.h"
 #include <stdexcept> /*runtime_error*/
+#include <immintrin.h>
+#include <math.h>
+#include <string> 
 
-HilbertCurve2D::HilbertCurve2D(int _order)
+HilbertCurve2D::HilbertCurve2D(uint32_t _order)
 {
-	// Todo verify order < 15: if not throw error?
 	order = _order;
 }
 
-
-unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
+void HilbertCurve2D::checkXY(uint32_t x, uint32_t y)
 {
-	//TODO: drawing explaining algorithm for ter presentation
+	uint32_t colspam = pow(2, order) - 1;
+	if (x > colspam || y > colspam)
+	{
+		throw std::runtime_error("x or y not associated with curve order" + std::to_string(order));
+	}
+}
+
+void HilbertCurve2D::checkHilberIndex(uint64_t hi)
+{
+	if ( hi > pow(4, order)-1 )
+	{
+		throw std::runtime_error("hilbertindex associated with curve order " + std::to_string(order));
+	}
+}
 
 
-	// verify if x, y are valid coords: if not throw error?
+uint64_t HilbertCurve2D::coords_to_hilbertindex(uint32_t x, uint32_t y)
+{
+	checkXY(x, y);
 
-	unsigned int index = 0;
+	uint64_t index = 0;
 
-	for (int i = order; i >= 0; i--)
+	for (int i = order - 1; i >= 0; i--)
 	{
 		index = index << 2;
-		unsigned int half = 1 << i;
+		uint32_t half = 1 << i;
 
 		// quadrant = x_i.y_i => quadrant in {00,01,10,11}
-		unsigned int quadrant = 0;
+		uint32_t quadrant = 0;
 		quadrant = (((x & half) > 0) << 1) | ((y & half) > 0);
 
 
@@ -37,20 +53,20 @@ unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 		switch (quadrant)
 		{
 		case 0:
-			{unsigned int tmp = x;
-			x = y;
-			y = tmp;
-			}
-			break;
+		{uint32_t tmp = x;
+		x = y;
+		y = tmp;
+		}
+		break;
 		case 1: //quadrant = 1
 			break;
 		case 2:
-			{unsigned int tmp = x;
-			x = ((1 << (i + 1)) - 1) - y;
-			y = ((1 << (i + 1)) - 1) - tmp;
-			}
-			quadrant = 3;
-			break;
+		{uint32_t tmp = x;
+		x = ((1 << (i + 1)) - 1) - y;
+		y = ((1 << (i + 1)) - 1) - tmp;
+		}
+		quadrant = 3;
+		break;
 		case 3:
 			quadrant = 2;
 			break;
@@ -62,15 +78,16 @@ unsigned int HilbertCurve2D::coords_to_index(unsigned int x, unsigned int y)
 	return index;
 }
 
-void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigned int& y)
+void HilbertCurve2D::hilbertindex_to_coord(uint64_t index, uint32_t& x, uint32_t& y)
 {
+	checkHilberIndex(index);
 	x = 0;
 	y = 0;
 
-	for (int i = 0; i <= order; i++)
+	for (int i = 0; i <= order - 1; i++)
 	{
 		// quadrant = index1.index0 => quadrant in {00,01,10,11}
-		unsigned int quadrant = 0;
+		uint32_t quadrant = 0;
 		quadrant = index & 3;
 
 		/* Transformations:
@@ -83,11 +100,11 @@ void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigne
 		switch (quadrant)
 		{
 		case 0:
-			{unsigned int tmp = x;
-			x = y;
-			y = tmp;
-			}
-			break;
+		{uint32_t tmp = x;
+		x = y;
+		y = tmp;
+		}
+		break;
 		case 1:
 			y = y | (1 << i);
 			break;
@@ -97,7 +114,7 @@ void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigne
 			break;
 		case 3:
 			x = x | (1 << i);
-			{unsigned int tmp = x;
+			{uint32_t tmp = x;
 			x = ((1 << (i + 1)) - 1) - y;
 			y = ((1 << (i + 1)) - 1) - tmp;
 			}
@@ -107,5 +124,31 @@ void HilbertCurve2D::index_to_coord(unsigned int index, unsigned int& x, unsigne
 		} // endswitch
 		index = index >> 2;
 	} //endfor
+}
+
+uint64_t HilbertCurve2D::coords_to_mortonindex(uint32_t x, uint32_t y)
+{
+	return _pdep_u64(x, UINT64_C(0x5555555555555555) << 1) | _pdep_u64(y, UINT64_C(0x5555555555555555));
+}
+
+void HilbertCurve2D::mortonindex_to_coord(uint64_t index, uint32_t& x, uint32_t& y)
+{
+	x = 0;
+	y = 0;
+	x = _pext_u64(index, UINT64_C(0x5555555555555555) << 1);
+	y = _pext_u64(index, UINT64_C(0x5555555555555555));
+
+}
+
+uint64_t HilbertCurve2D::mortonToHilbert(uint64_t zorder)
+{
+	uint32_t config = 0;
+	uint64_t hilbert = 0;
+	for (int i = order - 1; i >= 0; i--) {
+		uint32_t quadrant = zorder >> (2 * i) & 3;
+		hilbert = hilbert << 2 | base_pattern[config][quadrant];
+		config = configuration[config][quadrant];
+	}
+	return hilbert;
 }
 
