@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "Point2D.h"
+#include "Quadrant.h"
 
 class HilbertCurve2D
 {
@@ -50,6 +51,7 @@ public:
 
 protected:
 	uint32_t order{ 1 };
+	std::vector<Quadrant> quadrants;
 
 	void checkXY(uint32_t x, uint32_t y);
 	void checkHilberIndex(uint64_t hi);

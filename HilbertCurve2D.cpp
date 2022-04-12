@@ -7,6 +7,7 @@
 HilbertCurve2D::HilbertCurve2D(uint32_t _order)
 {
 	order = _order;
+	quadrants = std::vector<Quadrant>(pow(4, order));
 }
 
 void HilbertCurve2D::checkXY(uint32_t x, uint32_t y)

@@ -5,9 +5,15 @@
 
 int main(int argc, char* argv[])
 {
-	std::vector<Point2D> points = Point2D::generatePoints(1, 0, 0, 10, 10);
+	std::vector<Point2D> points = Point2D::generatePoints(100000, 0, 0, 10, 10);
 
-	HilbertCurve2D_Adaptive hc(points, 1);
+	/*for (auto p : points)
+	{
+		std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
+	}
+	std::cout << "========================" << std::endl;*/
+
+	HilbertCurve2D_Adaptive hc(points, 4);
 
 	uint32_t x{ 0 };
 	uint32_t y{ 1 };
@@ -25,19 +31,19 @@ int main(int argc, char* argv[])
 	hc.mortonindex_to_coord(hc.coords_to_mortonindex(x, y), x_unknown, y_unknown);
 	std::cout << "mortonindex_to_coord = (" << x_unknown << "," << y_unknown << ")" << std::endl;
 
-	std::vector<std::vector<Point2D>> quadrants(pow(4, 1));
-	for (uint64_t k = 0; k < quadrants.size(); k++)
-	{
-		quadrants[k] = hc.get_points_from_hilbertindex(k);
-	}
-	for (uint64_t k = 0; k < quadrants.size(); k++)
-	{
-		std::cout << "========= " << k << " ===========" << std::endl;
-		for (Point2D p : quadrants[k])
-		{
-			std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
-		}
-	}
+	//std::vector<std::vector<Point2D>> quadrants(pow(4, 1));
+	//for (uint64_t k = 0; k < quadrants.size(); k++)
+	//{
+	//	quadrants[k] = hc.get_points_from_hilbertindex(k);
+	//}
+	//for (uint64_t k = 0; k < quadrants.size(); k++)
+	//{
+	//	std::cout << "========= " << k << " ===========" << std::endl;
+	//	for (Point2D p : quadrants[k])
+	//	{
+	//		std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
+	//	}
+	//}
 	
 
 }

@@ -7,49 +7,36 @@
 
 HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order) : HilbertCurve2D(_order)
 {
-	points = _points;
+	std::vector<Point2D> points = _points;
 	tree = std::vector<double>(2 * pow(4, order) - 1);
-	quadrants = std::vector<Quadrant>(pow(4, order));
-	genTree(0, points.size() - 1, 0, 0);
-
-	for (auto p : points)
-	{
-		std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
-	}
-	for (auto q : quadrants)
-	{
-		std::cout << q.start << " " << q.end << std::endl;
-	}
+	genTree(points, 0, points.size() - 1, 0, 0);
 }
 
 Point2D HilbertCurve2D_Adaptive::get_mappedPoint(Point2D point)
 {
 	uint64_t qindex = get_quadrant_index(point);
 	Quadrant q = quadrants[qindex];
-	return Point2D(q.x, q.y);
+	return Point2D(q.getX(), q.getY());
 }
 
 uint64_t HilbertCurve2D_Adaptive::get_MortonIndex(Point2D point)
 {
 	uint64_t qindex = get_quadrant_index(point);
 	Quadrant q = quadrants[qindex];
-	return q.morton_index;
+	return q.getMortonIndex();
 }
 
 uint64_t HilbertCurve2D_Adaptive::get_HilbertIndex(Point2D point)
 {
 	uint64_t qindex = get_quadrant_index(point);
 	Quadrant q = quadrants[qindex];
-	return q.hilbert_index;
+	return q.getHilbertIndex();
 }
 
 std::vector<Point2D> HilbertCurve2D_Adaptive::get_points_from_hilbertindex(uint64_t hilbertindex)
 {
 	checkHilberIndex(hilbertindex);
-	Quadrant q = quadrants[hilbertindex];
-	std::vector<Point2D>::const_iterator first = points.begin() + q.start;
-	std::vector<Point2D>::const_iterator last = points.begin() + q.end+1;
-	return std::vector<Point2D>(first, last);
+	return quadrants[hilbertindex].getPoints();
 }
 
 uint32_t HilbertCurve2D_Adaptive::pickPivot(uint32_t start, uint32_t end)
@@ -61,7 +48,7 @@ uint32_t HilbertCurve2D_Adaptive::pickPivot(uint32_t start, uint32_t end)
 	return distribution(generator);
 }
 
-void HilbertCurve2D_Adaptive::swap(uint32_t i, uint32_t j)
+void HilbertCurve2D_Adaptive::swap(std::vector<Point2D>& points, uint32_t i, uint32_t j)
 {
 	Point2D tmp = points[i];
 	points[i] = points[j];
@@ -94,18 +81,23 @@ uint64_t HilbertCurve2D_Adaptive::get_quadrant_index(Point2D point)
 	return tree[pos];
 }
 
-void HilbertCurve2D_Adaptive::genTree(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex)
+void HilbertCurve2D_Adaptive::genTree(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t level, uint64_t zindex)
 {
+	if (start >= end) {
+		std::cout << "level: " << level << " start: " << start << " end: " << end << std::endl;
+	}
 	//position in tree vector
 	uint32_t pos = pow(2, level) - 1 + zindex;
 	//if leaf
 	if (level == 2 * order)
 	{
-		//TODO
 		uint64_t hi = mortonToHilbert(zindex);
 		uint32_t x, y;
+		std::vector<Point2D>::const_iterator first = points.begin() + start;
+		std::vector<Point2D>::const_iterator last = points.begin() + end + 1;
+		std::vector<Point2D> pts(first, last);
 		mortonindex_to_coord(zindex, x, y);
-		Quadrant q = Quadrant(start, end, zindex, x, y, hi);
+		Quadrant q = Quadrant(zindex, x, y, hi, pts);
 		quadrants[hi] = q;
 		tree[pos] = hi;
 		return;
@@ -114,29 +106,29 @@ void HilbertCurve2D_Adaptive::genTree(uint32_t start, uint32_t end, uint32_t lev
 	uint32_t pivot_index;
 	if (!(level % 2))
 	{
-		pivot_index = select_median_x(start, end);
+		pivot_index = select_median_x(points, start, end);
 		//add split_value to tree
 		tree[pos] = points[pivot_index].getX();
 	}
 	else {
-		pivot_index = select_median_y(start, end);
+		pivot_index = select_median_y(points, start, end);
 		tree[pos] = points[pivot_index].getY();
 	}
 
 	uint32_t z_left, z_rigth;
 	z_left = zindex << 1;
 	z_rigth = zindex << 1 | 1;
-	genTree(start, pivot_index, level + 1, z_left);
-	genTree(pivot_index + 1, end, level + 1, z_rigth);
+	genTree(points, start, pivot_index, level + 1, z_left);
+	genTree(points, pivot_index + 1, end, level + 1, z_rigth);
 
 }
 
-uint32_t HilbertCurve2D_Adaptive::select_median_x(uint32_t start, uint32_t end)
+uint32_t HilbertCurve2D_Adaptive::select_median_x(std::vector<Point2D>& points, uint32_t start, uint32_t end)
 {
 	//pick random uniform pivot
 	uint32_t pivot_index = pickPivot(start, end);
 	//place pivot at start
-	swap(pivot_index, start);
+	swap(points, pivot_index, start);
 	pivot_index = start;
 
 	// A pivot B with point in A if point.x < pivot.x ...
@@ -144,8 +136,8 @@ uint32_t HilbertCurve2D_Adaptive::select_median_x(uint32_t start, uint32_t end)
 	{
 		if (points[k].getX() < points[pivot_index].getX())
 		{
-			swap(k, pivot_index + 1);
-			swap(pivot_index, pivot_index + 1);
+			swap(points, k, pivot_index + 1);
+			swap(points, pivot_index, pivot_index + 1);
 			pivot_index++;
 		}
 	}
@@ -156,19 +148,19 @@ uint32_t HilbertCurve2D_Adaptive::select_median_x(uint32_t start, uint32_t end)
 	//if median in A
 	if (pivot_index < start + ((end - start) / 2))
 	{
-		return select_median_x(pivot_index + 1, end);
+		return select_median_x(points, pivot_index + 1, end);
 	}//if in B
 	else {
-		return select_median_x(start, pivot_index - 1);
+		return select_median_x(points, start, pivot_index - 1);
 	}
 }
 
-uint32_t HilbertCurve2D_Adaptive::select_median_y(uint32_t start, uint32_t end)
+uint32_t HilbertCurve2D_Adaptive::select_median_y(std::vector<Point2D>& points, uint32_t start, uint32_t end)
 {
 	//pick random uniform pivot
 	uint32_t pivot_index = pickPivot(start, end);
 	//place pivot at start
-	swap(pivot_index, start);
+	swap(points, pivot_index, start);
 	pivot_index = start;
 
 	// A pivot B with point in A if point.y < pivot.y ...
@@ -176,8 +168,8 @@ uint32_t HilbertCurve2D_Adaptive::select_median_y(uint32_t start, uint32_t end)
 	{
 		if (points[k].getY() < points[pivot_index].getY())
 		{
-			swap(k, pivot_index + 1);
-			swap(pivot_index, pivot_index + 1);
+			swap(points, k, pivot_index + 1);
+			swap(points, pivot_index, pivot_index + 1);
 			pivot_index++;
 		}
 	}
@@ -188,10 +180,10 @@ uint32_t HilbertCurve2D_Adaptive::select_median_y(uint32_t start, uint32_t end)
 	//if median in A
 	if (pivot_index < start + ((end - start) / 2))
 	{
-		return select_median_y(pivot_index + 1, end);
+		return select_median_y(points, pivot_index + 1, end);
 	}//if in B
 	else {
-		return select_median_y(start, pivot_index - 1);
+		return select_median_y(points, start, pivot_index - 1);
 	}
 
 }
