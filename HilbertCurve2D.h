@@ -12,9 +12,9 @@ class HilbertCurve2D
 	// we assume 0,0 pos at bottom left corner
 	/* initial order = 1  ==> 4 squares
 	*   ____ ____
-	*  | 11 | 10 |
+	*  | 01 | 10 |
 	*  |____|____|
-	*  | 00 | 01 |
+	*  | 00 | 11 |
 	*  |____|____|
 	*
 	* order n => 2^(n) * 2^(n) squares
@@ -38,19 +38,27 @@ public:
 	//gives hilbert index from morton index
 	uint64_t mortonToHilbert(uint64_t zorder);
 
-	virtual Point2D get_mappedPoint(Point2D point)=0;
-	virtual uint64_t get_MortonIndex(Point2D point)=0;
-	virtual uint64_t get_HilbertIndex(Point2D point)=0;
+	virtual Point2D get_mappedPoint(Point2D point) = 0;
+	virtual uint64_t get_MortonIndex(Point2D point) = 0;
+	virtual uint64_t get_HilbertIndex(Point2D point) = 0;
 	virtual std::vector<Point2D> get_points_from_hilbertindex(uint64_t hilbertindex) = 0;
 
+	//TODO:
+	/*
+	* get_n_closest_points(point)
+	* get_points_in_range(point, dist_max)
+	*/
+
 	//constructors
-	HilbertCurve2D(uint32_t _order);
+	HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr);
 	//destructor
 	~HilbertCurve2D() = default;
 
 
 protected:
 	uint32_t order{ 1 };
+	Point2D bottomLeft{ 0,0 };
+	Point2D topRight{ 10, 10 };
 	std::vector<Quadrant> quadrants;
 
 	void checkXY(uint32_t x, uint32_t y);
@@ -59,7 +67,7 @@ protected:
 
 
 private:
-	
+
 	static constexpr uint32_t base_pattern[4][4] = {
 	{0,1,3,2},
 	{0,3,1,2},

@@ -24,3 +24,8 @@ std::vector<Point2D> Quadrant::getPoints()
 {
 	return points;
 }
+
+void Quadrant::addPoints(std::vector<Point2D> _points)
+{
+	points.insert(points.end(), _points.begin(), _points.end());
+}

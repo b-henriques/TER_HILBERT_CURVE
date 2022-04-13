@@ -12,6 +12,7 @@ public:
 	uint64_t getHilbertIndex();
 	uint64_t getMortonIndex();
 	std::vector<Point2D> getPoints();
+	void addPoints(std::vector<Point2D> _points);
 
 
 private:

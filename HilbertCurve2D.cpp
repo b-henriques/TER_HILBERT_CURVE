@@ -4,10 +4,16 @@
 #include <math.h>
 #include <string> 
 
-HilbertCurve2D::HilbertCurve2D(uint32_t _order)
+HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr)
 {
+	if (_bl.getX() >= _tr.getX() || _bl.getY() >= _tr.getY())
+	{
+		throw std::runtime_error("illformed bounding-box: bottomleft point shoud be < to topright point" );
+	}
 	order = _order;
 	quadrants = std::vector<Quadrant>(pow(4, order));
+	bottomLeft = _bl;
+	topRight = _tr;
 }
 
 void HilbertCurve2D::checkXY(uint32_t x, uint32_t y)

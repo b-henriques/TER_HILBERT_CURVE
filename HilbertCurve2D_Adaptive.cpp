@@ -5,7 +5,7 @@
 #include <string>  
 #include <iostream>
 
-HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order) : HilbertCurve2D(_order)
+HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order, Point2D _bl, Point2D _tr) : HilbertCurve2D(_order, _bl, _tr)
 {
 	std::vector<Point2D> points = _points;
 	tree = std::vector<double>(2 * pow(4, order) - 1);
@@ -115,11 +115,11 @@ void HilbertCurve2D_Adaptive::genTree(std::vector<Point2D>& points, uint32_t sta
 		tree[pos] = points[pivot_index].getY();
 	}
 
-	uint32_t z_left, z_rigth;
+	uint32_t z_left, z_right;
 	z_left = zindex << 1;
-	z_rigth = zindex << 1 | 1;
+	z_right = zindex << 1 | 1;
 	genTree(points, start, pivot_index, level + 1, z_left);
-	genTree(points, pivot_index + 1, end, level + 1, z_rigth);
+	genTree(points, pivot_index + 1, end, level + 1, z_right);
 
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Point2D.h"
 #include "HilbertCurve2D.h"
-#include "Quadrant.h"
 #include <vector>
 
 
@@ -9,7 +8,7 @@
 class HilbertCurve2D_Adaptive : public HilbertCurve2D
 {
 public:
-	HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order);
+	HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order, Point2D _bl, Point2D _tr);
 
 	Point2D get_mappedPoint(Point2D point);
 	uint64_t get_MortonIndex(Point2D point);
