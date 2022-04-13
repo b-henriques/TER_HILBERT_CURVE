@@ -8,10 +8,15 @@ public:
 		: morton_index(_mi), x(_x), y(_y), hilbert_index(_hi), points(_points) {}
 
 	uint32_t getX();
+	void setX(uint32_t _x);
 	uint32_t getY();
+	void setY(uint32_t _y);
 	uint64_t getHilbertIndex();
+	void setHilbertIndex(uint64_t _hi);
 	uint64_t getMortonIndex();
+	void setMortonIndex(uint64_t _mi);
 	std::vector<Point2D> getPoints();
+	void reserve(int n);
 	void addPoints(std::vector<Point2D> _points);
 	void addPoint(Point2D _point);
 

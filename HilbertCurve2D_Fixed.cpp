@@ -6,15 +6,20 @@
 HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, int nthreads) : HilbertCurve2D(_order, _bl, _tr)
 {
 	genQuadrants(_points, nthreads);
-	/*for (auto q : quadrants)
+	for (auto q : quadrants)
 	{
-		std::cout << "Quadrant" << q.getHilbertIndex() << std::endl;
+		std::cout << q.getPoints().size() << "-";
+		/*std::cout << "Quadrant: " << q.getHilbertIndex() << std::endl;
+		std::cout << "x,y: " << q.getX() << "," << q.getY() << std::endl;
+		std::cout << "Morton: " << q.getMortonIndex() << std::endl;
 		for (auto p : q.getPoints())
 		{
 			std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
 		}
-		std::cout << "========================" << std::endl;
-	}*/
+		std::cout << "========================" << std::endl;*/
+		
+	}
+	std::cout << std::endl;
 
 }
 

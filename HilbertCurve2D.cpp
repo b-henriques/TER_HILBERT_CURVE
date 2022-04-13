@@ -8,10 +8,18 @@ HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr)
 {
 	if (_bl.getX() >= _tr.getX() || _bl.getY() >= _tr.getY())
 	{
-		throw std::runtime_error("illformed bounding-box: bottomleft point shoud be < to topright point" );
+		throw std::runtime_error("illformed bounding-box: bottomleft point shoud be < to topright point");
 	}
 	order = _order;
 	quadrants = std::vector<Quadrant>(pow(4, order));
+	for (int i = 0; i < quadrants.size(); i++) {
+		quadrants[i].setHilbertIndex(i);
+		uint32_t x, y;
+		hilbertindex_to_coord(i, x, y);
+		quadrants[i].setX(x);
+		quadrants[i].setY(y);
+		quadrants[i].setMortonIndex(coords_to_mortonindex(x, y));
+	}
 	bottomLeft = _bl;
 	topRight = _tr;
 }
@@ -27,7 +35,7 @@ void HilbertCurve2D::checkXY(uint32_t x, uint32_t y)
 
 void HilbertCurve2D::checkHilberIndex(uint64_t hi)
 {
-	if ( hi > pow(4, order)-1 )
+	if (hi > pow(4, order) - 1)
 	{
 		throw std::runtime_error("hilbertindex associated with curve order " + std::to_string(order));
 	}

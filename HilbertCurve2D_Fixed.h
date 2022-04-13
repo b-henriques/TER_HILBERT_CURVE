@@ -20,7 +20,6 @@ private:
 	);
 	void mapCellY(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, double vmin, double f);
 	void map_points_hi(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, std::vector<uint32_t>& ymap, std::vector<uint64_t>& quadrant_points);
-	void points_to_quadrants(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, std::vector<uint32_t>& ymap, std::vector<std::vector<Point2D>>& quadrant_points);
 	void genQuadrants(std::vector<Point2D>& points, int nbthreads);
 	
 	void genQuadrantsWorker(

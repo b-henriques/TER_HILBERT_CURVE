@@ -22,8 +22,8 @@ private:
 	std::vector<double> tree;
 	
 	void genTree(std::vector<Point2D> &points, uint32_t start, uint32_t end, uint32_t level, uint64_t zindex);
-	uint32_t select_median_x(std::vector<Point2D>& points, uint32_t start, uint32_t end);
-	uint32_t select_median_y(std::vector<Point2D>& points, uint32_t start, uint32_t end);
+	uint32_t select_median_x(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t m);
+	uint32_t select_median_y(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t m);
 	static uint32_t pickPivot(uint32_t start, uint32_t end);
 	void swap(std::vector<Point2D>& points, uint32_t i, uint32_t j);
 
