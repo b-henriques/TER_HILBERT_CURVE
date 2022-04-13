@@ -6,7 +6,8 @@
 
 int main(int argc, char* argv[])
 {
-	std::vector<Point2D> points = Point2D::generatePoints(1000, 0, 0, 10, 10);
+	//16777216 -- order 12
+	std::vector<Point2D> points = Point2D::generatePoints(16777216, 0, 0, 10, 10);
 
 	/*for (auto p : points)
 	{
@@ -19,7 +20,7 @@ int main(int argc, char* argv[])
 
 	uint32_t x{ 0 };
 	uint32_t y{ 1 };
-	std::cout << hc.coords_to_hilbertindex(x, y) << std::endl;
+	std::cout << hc.coords_to_hilbertindex(x, y) << std::endl; 
 
 	uint32_t x_unknown{ 1 };
 	uint32_t y_unknown{ 1 };

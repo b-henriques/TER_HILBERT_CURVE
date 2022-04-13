@@ -6,7 +6,16 @@
 HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, int nthreads) : HilbertCurve2D(_order, _bl, _tr)
 {
 	genQuadrants(_points, nthreads);
-	
+	/*for (auto q : quadrants)
+	{
+		std::cout << "Quadrant" << q.getHilbertIndex() << std::endl;
+		for (auto p : q.getPoints())
+		{
+			std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
+		}
+		std::cout << "========================" << std::endl;
+	}*/
+
 }
 
 Point2D HilbertCurve2D_Fixed::get_mappedPoint(Point2D point)
@@ -56,16 +65,10 @@ void HilbertCurve2D_Fixed::mapCellY(std::vector<Point2D>& points, uint32_t start
 	}
 }
 
-void HilbertCurve2D_Fixed::points_to_quadrants(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, std::vector<uint32_t>& ymap, std::vector<std::vector<Point2D>>& quadrant_points)
+void HilbertCurve2D_Fixed::map_points_hi(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, std::vector<uint32_t>& ymap, std::vector<uint64_t>& quadrant_points)
 {
-	quadrant_points = std::vector<std::vector<Point2D>>(pow(4, order));
 	for (int i = start; i < end; i++) {
-		//quadrant_points[hilbertindex].pushback(point)
-		quadrant_points[
-			mortonToHilbert(
-				coords_to_mortonindex(xmap[i], ymap[i])
-			)
-		].push_back(points[i]);
+		quadrant_points[i] = mortonToHilbert(coords_to_mortonindex(xmap[i], ymap[i]));
 	}
 }
 
@@ -76,7 +79,7 @@ void HilbertCurve2D_Fixed::genQuadrants(std::vector<Point2D>& points, int nbthre
 	std::vector<uint32_t> xmap(points.size());
 	std::vector<uint32_t> ymap(points.size());
 
-	std::vector<std::vector<std::vector<Point2D>>> thread_output(nbthreads);
+	std::vector<uint64_t> thread_output(points.size());
 
 	std::vector<std::thread> threads;
 	uint32_t interval = points.size() / nbthreads;
@@ -94,7 +97,7 @@ void HilbertCurve2D_Fixed::genQuadrants(std::vector<Point2D>& points, int nbthre
 				std::ref(points), start, end,
 				std::ref(xmap), bottomLeft.getX(), xf,
 				std::ref(ymap), bottomLeft.getY(), yf,
-				std::ref(thread_output[t])
+				std::ref(thread_output)
 			)
 		);
 	}
@@ -112,13 +115,12 @@ void HilbertCurve2D_Fixed::genQuadrants(std::vector<Point2D>& points, int nbthre
 		{
 			end = quadrants.size();
 		}
-		threads[t] =
-			std::thread(
-				&HilbertCurve2D_Fixed::gatheroutput, this,
-				start, end,
-				std::ref(thread_output)
-			)
-			;
+		threads[t] = std::thread(
+			&HilbertCurve2D_Fixed::gatheroutput, this,
+			std::ref(points),
+			start, end,
+			std::ref(thread_output)
+		);
 	}
 
 	for (int t = 0; t < nbthreads; t++)
@@ -127,24 +129,20 @@ void HilbertCurve2D_Fixed::genQuadrants(std::vector<Point2D>& points, int nbthre
 	}
 }
 
-void HilbertCurve2D_Fixed::genQuadrantsWorker(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, double xmin, double xf, std::vector<uint32_t>& ymap, double ymin, double yf, std::vector<std::vector<Point2D>>& quadrant_points)
+void HilbertCurve2D_Fixed::genQuadrantsWorker(std::vector<Point2D>& points, uint32_t start, uint32_t end, std::vector<uint32_t>& xmap, double xmin, double xf, std::vector<uint32_t>& ymap, double ymin, double yf, std::vector<uint64_t>& quadrant_points)
 {
 	mapCellX(points, start, end, xmap, xmin, xf);
 	mapCellY(points, start, end, ymap, ymin, yf);
-	points_to_quadrants(
-		points, start, end,
-		xmap, ymap,
-		quadrant_points
-	);
+	map_points_hi(points, start, end, xmap, ymap, quadrant_points);
 }
 
-void HilbertCurve2D_Fixed::gatheroutput(uint64_t start, uint64_t end, std::vector<std::vector<std::vector<Point2D>>> outputs)
+void HilbertCurve2D_Fixed::gatheroutput(std::vector<Point2D>& points, uint64_t start, uint64_t end, std::vector<uint64_t> outputs)
 {
-	for (int t = 0; t < outputs.size(); t++)
+	for (int t = 0; t < points.size(); t++)
 	{
-		for (int pts = start; pts < end; pts++)
+		if (outputs[t] >= start && outputs[t] < end)
 		{
-			quadrants[pts].addPoints(outputs[t][pts]);
+			quadrants[outputs[t]].addPoint(points[t]);
 		}
 	}
 }

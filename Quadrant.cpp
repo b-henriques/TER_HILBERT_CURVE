@@ -29,3 +29,8 @@ void Quadrant::addPoints(std::vector<Point2D> _points)
 {
 	points.insert(points.end(), _points.begin(), _points.end());
 }
+
+void Quadrant::addPoint(Point2D _point)
+{
+	points.push_back(_point);
+}

@@ -13,6 +13,7 @@ public:
 	uint64_t getMortonIndex();
 	std::vector<Point2D> getPoints();
 	void addPoints(std::vector<Point2D> _points);
+	void addPoint(Point2D _point);
 
 
 private:
