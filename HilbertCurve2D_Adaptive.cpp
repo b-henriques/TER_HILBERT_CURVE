@@ -8,7 +8,7 @@
 HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(const std::vector<Point2D> _points, uint32_t _order, Point2D _bl, Point2D _tr) : HilbertCurve2D(_order, _bl, _tr)
 {
 	std::vector<Point2D> points = _points;
-	tree = std::vector<double>(2 * pow(4, order) - 1);
+	tree = std::vector<double>(2 * pow(4, order) - 1, -1);
 	genTree(points, 0, points.size() - 1, 0, 0);
 	for (auto q : quadrants)
 	{
@@ -22,9 +22,9 @@ HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(const std::vector<Point2D> _poi
 		}
 		std::cout << "========================" << std::endl;*/
 	}
-	/*std::cout << std::endl;
-	for (auto d : tree){ std::cout << d << ","; }
-	std::cout << std::endl;*/
+	std::cout << std::endl;
+	for (auto d : tree) { std::cout << d << ","; }
+	std::cout << std::endl;
 }
 
 Point2D HilbertCurve2D_Adaptive::get_mappedPoint(Point2D point)
@@ -98,23 +98,19 @@ uint64_t HilbertCurve2D_Adaptive::get_quadrant_index(Point2D point)
 
 void HilbertCurve2D_Adaptive::genTree(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t level, uint64_t zindex)
 {
-	//TODO: only median split if 2 points or more, else even split
-	/*if (start > end) {
+	//TODO: only median split if 2 points or more, else even split?
+	if (start > end) {
 		return;
-	}*/
+	}
 	//position in tree vector
 	uint32_t pos = pow(2, level) - 1 + zindex;
 	//if leaf
 	if (level == 2 * order)
 	{
 		uint64_t hi = mortonToHilbert(zindex);
-		//uint32_t x, y;
 		std::vector<Point2D>::const_iterator first = points.begin() + start;
 		std::vector<Point2D>::const_iterator last = points.begin() + end + 1;
 		std::vector<Point2D> pts(first, last);
-		//mortonindex_to_coord(zindex, x, y);
-		//Quadrant q = Quadrant(zindex, x, y, hi, pts);
-		//quadrants[hi] = q;
 		quadrants[hi].addPoints(pts);
 		tree[pos] = hi;
 		return;
@@ -124,11 +120,25 @@ void HilbertCurve2D_Adaptive::genTree(std::vector<Point2D>& points, uint32_t sta
 	if (!(level % 2))
 	{
 		pivot_index = select_median_x(points, start, end, start + ((end - start) / 2));
+		//check for same value points
+
+		if (start < end) {
+			while (points[pivot_index].getX() == points[pivot_index + 1].getX())
+			{
+				pivot_index++;
+			}
+		}
 		//add split_value to tree
 		tree[pos] = points[pivot_index].getX();
 	}
 	else {
 		pivot_index = select_median_y(points, start, end, start + ((end - start) / 2));
+		if (start < end) {
+			while (points[pivot_index].getY() == points[pivot_index + 1].getY())
+			{
+				pivot_index++;
+			}
+		}
 		tree[pos] = points[pivot_index].getY();
 	}
 
@@ -141,7 +151,7 @@ void HilbertCurve2D_Adaptive::genTree(std::vector<Point2D>& points, uint32_t sta
 }
 
 uint32_t HilbertCurve2D_Adaptive::select_median_x(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t m)
-{ 
+{
 	//pick random uniform pivot
 	uint32_t pivot_index = pickPivot(start, end);
 	//place pivot at start
