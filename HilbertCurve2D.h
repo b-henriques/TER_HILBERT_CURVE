@@ -1,7 +1,8 @@
 #pragma once
-#include <cstdint>
 #include "Point2D.h"
-#include "Quadrant.h"
+#include <cstdint> /*uint*/
+#include <unordered_map>
+#include <vector>
 
 class HilbertCurve2D
 {
@@ -50,7 +51,7 @@ public:
 	*/
 
 	//constructors
-	HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr);
+	HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads = 1);
 	//destructor
 	~HilbertCurve2D() = default;
 
@@ -59,7 +60,16 @@ protected:
 	uint32_t order{ 1 };
 	Point2D bottomLeft{ 0,0 };
 	Point2D topRight{ 10, 10 };
-	std::vector<Quadrant> quadrants;
+	std::vector<Point2D>& points;
+	uint32_t nb_threads;
+
+	struct Quadrant {
+		int start;
+		int end;
+
+		Quadrant(int _s, int _e) : start(_s), end(_e) {};
+	};
+	std::unordered_map<uint64_t, Quadrant> quadrants;
 
 	void checkXY(uint32_t x, uint32_t y);
 	void checkHilberIndex(uint64_t hi);

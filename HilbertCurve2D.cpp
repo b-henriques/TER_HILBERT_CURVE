@@ -1,27 +1,19 @@
 #include "HilbertCurve2D.h"
 #include <stdexcept> /*runtime_error*/
-#include <immintrin.h>
-#include <math.h>
+#include <immintrin.h> /*_pdep_u64, _pext_u64*/
+#include <math.h> /*pow*/
 #include <string> 
 
-HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr)
+HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads): points(_points)
 {
 	if (_bl.getX() >= _tr.getX() || _bl.getY() >= _tr.getY())
 	{
 		throw std::runtime_error("illformed bounding-box: bottomleft point shoud be < to topright point");
 	}
 	order = _order;
-	quadrants = std::vector<Quadrant>(pow(4, order));
-	for (int i = 0; i < quadrants.size(); i++) {
-		quadrants[i].setHilbertIndex(i);
-		uint32_t x, y;
-		hilbertindex_to_coord(i, x, y);
-		quadrants[i].setX(x);
-		quadrants[i].setY(y);
-		quadrants[i].setMortonIndex(coords_to_mortonindex(x, y));
-	}
 	bottomLeft = _bl;
 	topRight = _tr;
+	nb_threads = _nb_threads;
 }
 
 void HilbertCurve2D::checkXY(uint32_t x, uint32_t y)
