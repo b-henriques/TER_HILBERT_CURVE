@@ -13,7 +13,7 @@ HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32
 {
 	x_factor = calulateFactor(bottomLeft.getX(), topRight.getX(), order);
 	y_factor = calulateFactor(bottomLeft.getY(), topRight.getY(), order);
-	std::cout << nb_threads;
+
 	generateCurve();
 	//std::cout << "========================" << std::endl;
 	//std::cout << quadrants.size() << std::endl;
@@ -98,7 +98,7 @@ void HilbertCurve2D_Fixed::mapPoints2HilbertIndex(uint64_t start, uint64_t end, 
 	}
 }
 
-void HilbertCurve2D_Fixed::generateQuadrants(uint64_t hi_start, uint64_t hi_end, std::vector<std::atomic<std::uint64_t>>& nbPointsPerQuadrant, uint64_t start_index)
+void HilbertCurve2D_Fixed::generateQuadrants(uint64_t hi_start, uint64_t hi_end, std::vector<std::atomic<std::uint64_t>>& nbPointsPerQuadrant, uint64_t start_index, std::mutex& quadrants_mutex)
 {
 	uint64_t i;
 	uint64_t pos = start_index;
@@ -106,11 +106,13 @@ void HilbertCurve2D_Fixed::generateQuadrants(uint64_t hi_start, uint64_t hi_end,
 		uint64_t nbpts = nbPointsPerQuadrant[i];
 		if (nbpts)
 		{
+			quadrants_mutex.lock();
 			quadrants.insert(std::pair<uint64_t, HilbertCurve2D::Quadrant>(
 				i,
 				HilbertCurve2D::Quadrant(pos, pos + nbpts - 1)
 				)
 			);
+			quadrants_mutex.unlock();
 			pos += nbpts;
 		}
 	}
@@ -147,9 +149,9 @@ void HilbertCurve2D_Fixed::generateCurve()
 	{
 		threads[t].join();
 	}
-	std::cout << "mapped";
+	std::cout << "mapped\n";
+	std::mutex quadrants_mutex;
 
-	std::cout << pow(4, order) << std::endl;
 	uint64_t hi_interval = pow(4, order) / nb_threads;
 	for (t = 0; t < nb_threads; t++)
 	{
@@ -159,12 +161,13 @@ void HilbertCurve2D_Fixed::generateCurve()
 		{
 			hi_end = pow(4, order);
 		}
-		std::cout <<"("<<hi_start<<","<<hi_end<<")" << std::endl;
+		uint64_t start_index = threads_hi_start_indexes[t];
 		threads[t] = std::thread(
 			&HilbertCurve2D_Fixed::generateQuadrants, this,
 			hi_start, hi_end,
 			std::ref(nbPointsPerQuadrant),
-			(uint64_t)threads_hi_start_indexes[t]
+			start_index,
+			std::ref(quadrants_mutex)
 		);
 	}
 
@@ -172,9 +175,9 @@ void HilbertCurve2D_Fixed::generateCurve()
 	{
 		threads[t].join();
 	}
-	std::cout << "quadrants generated";
+	std::cout << "quadrants generated \n";
 	quick_sort(0, points.size() - 1, hi_map, nb_threads);
-	std::cout << "sorted";
+	std::cout << "sorted\n";
 
 }
 
@@ -213,7 +216,6 @@ void HilbertCurve2D_Fixed::quick_sort(uint64_t start, uint64_t end, std::vector<
 				std::ref(hi_map),
 				nbthreads - 1
 			);
-			std::cout << "split";
 			quick_sort(start, pivot_index - 1, hi_map, nbthreads - 1);
 			t.join();
 		}

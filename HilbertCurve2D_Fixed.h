@@ -1,6 +1,7 @@
 #pragma once
 #include "HilbertCurve2D.h"
 #include <atomic>
+#include <mutex>
 class HilbertCurve2D_Fixed :
 	public HilbertCurve2D
 {
@@ -28,7 +29,8 @@ private:
 	void generateQuadrants(
 		uint64_t hi_start, uint64_t hi_end,
 		std::vector<std::atomic<std::uint64_t>>& nbPointsPerQuadrant,
-		uint64_t start_index
+		uint64_t start_index,
+		std::mutex &quadrants_mutex
 	);
 
 
