@@ -2,6 +2,7 @@
 #include "Point2D.h"
 #include "HilbertCurve2D.h"
 #include <memory> /*unique_ptr*/
+#include <mutex>
 
 
 
@@ -34,11 +35,14 @@ private:
 	std::unique_ptr<Node> tree;
 
 	
+	Node* generateTree();
 
+	void genTreePar(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex, Node* output, uint32_t nbthreads, std::mutex& quadrants_mutex);
 
-	Node* genTree(std::vector<Point2D>& points, uint32_t start, uint32_t end, uint32_t level, uint64_t zindex);
-	uint32_t select_median_x(std::vector<Point2D>& points, uint32_t start, uint32_t end);
-	uint32_t select_median_y(std::vector<Point2D>& points, uint32_t start, uint32_t end);
+	Node* genTree(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex);
+
+	uint32_t select_median_x(uint32_t start, uint32_t end);
+	uint32_t select_median_y(uint32_t start, uint32_t end);
 	
 	uint64_t get_quadrant_index(Point2D point);
 

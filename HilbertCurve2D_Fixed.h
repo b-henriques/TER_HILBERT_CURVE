@@ -1,7 +1,8 @@
 #pragma once
 #include "HilbertCurve2D.h"
-#include <atomic>
-#include <mutex>
+#include<atomic>
+#include<unordered_map>
+
 class HilbertCurve2D_Fixed :
 	public HilbertCurve2D
 {
@@ -20,26 +21,28 @@ private:
 
 	void mapCellXY(Point2D point, uint32_t& x, uint32_t& y);
 
+	struct Quadrants_info {
+		std::atomic<std::uint64_t> nbpoints;
+		std::atomic<std::uint64_t> start_pos;
+	};
+
 	void mapPoints2HilbertIndex(
 		uint64_t start, uint64_t end,
-		std::vector<std::atomic<std::uint64_t>>& nbPointsPerQuadrant,
-		std::vector<uint64_t>& hi_map,
-		std::vector< std::atomic<uint64_t>>& threads_hi_start_indexes
+		std::vector<Quadrants_info>& quadrants_info,
+		std::vector<uint64_t>& hi_map
 	);
 	void generateQuadrants(
 		uint64_t hi_start, uint64_t hi_end,
-		std::vector<std::atomic<std::uint64_t>>& nbPointsPerQuadrant,
-		uint64_t start_index,
-		std::mutex &quadrants_mutex
+		std::vector<Quadrants_info>& quadrants_info
+	);
+	void orderPoints(
+		uint64_t start, uint64_t end,
+		std::vector<Quadrants_info>& quadrants_info,
+		const std::vector<uint64_t>& hi_map,
+		const std::vector<Point2D>& tmpPoints
 	);
 
-
-
 	void generateCurve();
-
-	void quick_sort(uint64_t start, uint64_t end, std::vector<uint64_t>& hi_map, uint32_t nbthreads = 1);
-	uint64_t pickPivot(uint64_t start, uint64_t end);
-	void swap(uint64_t i, uint64_t j, std::vector<uint64_t>& hi_map);
 
 };
 

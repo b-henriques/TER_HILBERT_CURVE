@@ -1,8 +1,11 @@
 #pragma once
 #include "Point2D.h"
 #include <cstdint> /*uint*/
-#include <unordered_map>
 #include <vector>
+
+//https://docs.microsoft.com/fr-fr/cpp/parallel/concrt/parallel-containers-and-objects?view=msvc-170#unordered_map
+#include <ppl.h>
+#include <concurrent_unordered_map.h>
 
 class HilbertCurve2D
 {
@@ -69,11 +72,13 @@ protected:
 
 		Quadrant(int _s, int _e) : start(_s), end(_e) {};
 	};
-	std::unordered_map<uint64_t, Quadrant> quadrants;
+
+
+	concurrency::concurrent_unordered_map<uint64_t, Quadrant> quadrants;
+
 
 	void checkXY(uint32_t x, uint32_t y);
 	void checkHilberIndex(uint64_t hi);
-
 
 
 private:

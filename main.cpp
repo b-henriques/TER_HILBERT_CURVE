@@ -3,14 +3,15 @@
 #include "HilbertCurve2D_Adaptive.h"
 #include "HilbertCurve2D_Fixed.h"
 #include <iostream>
+#include <windows.h>
 
 int main(int argc, char* argv[])
 {
 	//16777216 -- order 12 pow(4,2)
-	std::vector<Point2D> points = Point2D::generatePoints(16777216, 0, 0, 10, 10);
+	std::vector<Point2D> points = Point2D::generatePoints(167772160, 0, 0, 10, 10);
 
-	//std::vector<Point2D> points;
-	/*points.push_back(Point2D(1, 1));
+	/*std::vector<Point2D> points;
+	points.push_back(Point2D(1, 1));
 	points.push_back(Point2D(1, 2));
 	points.push_back(Point2D(2, 4));
 	points.push_back(Point2D(3, 4));
@@ -34,15 +35,14 @@ int main(int argc, char* argv[])
 	points.push_back(Point2D(4, 3));
 	points.push_back(Point2D(4, 4));*/
 
-	/*for (auto p : points)
-	{
-		std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
-	}
-	std::cout << "========================" << std::endl;*/
+	//for (auto p : points)
+	//{
+	//	std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
+	//}
+	//std::cout << "========================" << std::endl;
 
-	HilbertCurve2D_Fixed hc(points, 12, Point2D(0,0), Point2D(10,10), 8);
-	//HilbertCurve2D_Adaptive hc(points, 1, Point2D(0, 0), Point2D(10, 10));
-
+	HilbertCurve2D_Fixed hc(points, 12, Point2D(0, 0), Point2D(10, 10), 8);
+	//HilbertCurve2D_Adaptive hc(points, 12, Point2D(0, 0), Point2D(10, 10), 8);
 
 	std::cout << std::endl << std::endl;
 	uint32_t x{ 0 };
