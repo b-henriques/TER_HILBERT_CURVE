@@ -2,8 +2,7 @@
 #include <thread>
 #include <math.h> /*ceil*/
 #include <functional> /*ref*/
-#include<iostream>
-#include<utility>
+#include<utility> /*make_pair*/
 
 HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads)
 	: HilbertCurve2D(_order, _bl, _tr, _points, _nb_threads)
@@ -12,35 +11,44 @@ HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32
 	y_factor = calulateFactor(bottomLeft.getY(), topRight.getY(), order);
 
 	generateCurve();
-	//std::cout << "========================" << std::endl;
-	//std::cout << quadrants.size() << std::endl;
-	//for (auto q : quadrants)
-	//{
-	//	std::cout << q.first << "(" << q.second.start << "," << q.second.end << ")" << std::endl;
-	//	for (int k = q.second.start; k <= q.second.end; k++)
-	//	{
-	//		std::cout << "---(" << points[k].getX() << "," << points[k].getY() << ")" << std::endl;
-	//	}
-	//}
 }
 
-Point2D HilbertCurve2D_Fixed::get_mappedPoint(Point2D point)
+std::pair<uint32_t, uint32_t> HilbertCurve2D_Fixed::get_mappedPoint(Point2D point)
 {
-	return Point2D();
+	checkPoint(point);
+	uint32_t x, y;
+	mapCellXY(point, x, y);
+	return std::pair<uint32_t, uint32_t>(x, y);
 }
 
 uint64_t HilbertCurve2D_Fixed::get_MortonIndex(Point2D point)
 {
-	return uint64_t();
+	checkPoint(point);
+	std::pair<uint64_t, uint64_t> coords = get_mappedPoint(point);
+	return coords_to_mortonindex(coords.first, coords.second);
 }
 
 uint64_t HilbertCurve2D_Fixed::get_HilbertIndex(Point2D point)
 {
-	return uint64_t();
+	checkPoint(point);
+	uint64_t zindex = get_MortonIndex(point);
+	return mortonToHilbert(zindex);
 }
 
-std::vector<Point2D> HilbertCurve2D_Fixed::get_points_from_hilbertindex(uint64_t hilbertindex)
+std::vector<Point2D> HilbertCurve2D_Fixed::get_n_closest(Point2D point, uint32_t n)
 {
+	checkPoint(point);
+
+	return std::vector<Point2D>();
+}
+
+std::vector<Point2D> HilbertCurve2D_Fixed::get_points_in_range(Point2D point, double dist_max)
+{
+	checkPoint(point);
+
+	Point2D top, bottom, left, right;
+
+
 	return std::vector<Point2D>();
 }
 
@@ -62,7 +70,6 @@ void HilbertCurve2D_Fixed::mapCellXY(Point2D point, uint32_t& x, uint32_t& y)
 	x = (point.getX() - bottomLeft.getX()) * x_factor;
 	y = (point.getY() - bottomLeft.getY()) * y_factor;
 }
-
 
 void HilbertCurve2D_Fixed::mapPoints2HilbertIndex(uint64_t start, uint64_t end, std::vector<Quadrants_info>& quadrants_info, std::vector<uint64_t>& hi_map)
 {
@@ -118,7 +125,6 @@ void HilbertCurve2D_Fixed::orderPoints(uint64_t start, uint64_t end, std::vector
 		points[pos] = tmpPoints[i];
 	}
 }
-
 
 void HilbertCurve2D_Fixed::generateCurve()
 {

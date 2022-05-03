@@ -23,6 +23,15 @@ void Point2D::setY(double _y)
 	y = _y;
 }
 
+double Point2D::dist(Point2D point)
+{
+	return sqrt(
+		pow(x - point.getX(), 2) +
+		pow(y - point.getY(), 2)
+		* 1.0 /*implicit conversion to double*/
+	);
+}
+
 std::vector<Point2D> Point2D::generatePoints(int n_points, double x_min, double y_min, double x_max, double y_max)
 {
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();

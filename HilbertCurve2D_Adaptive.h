@@ -2,8 +2,6 @@
 #include "Point2D.h"
 #include "HilbertCurve2D.h"
 #include <memory> /*unique_ptr*/
-#include <mutex>
-
 
 
 
@@ -12,10 +10,12 @@ class HilbertCurve2D_Adaptive : public HilbertCurve2D
 public:
 	HilbertCurve2D_Adaptive(std::vector<Point2D> &_points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads = 1);
 
-	Point2D get_mappedPoint(Point2D point);
-	uint64_t get_MortonIndex(Point2D point);
-	uint64_t get_HilbertIndex(Point2D point);
-	std::vector<Point2D> get_points_from_hilbertindex(uint64_t hilbertindex);
+	virtual std::pair<uint32_t, uint32_t> get_mappedPoint(Point2D point);
+	virtual uint64_t get_MortonIndex(Point2D point);
+	virtual uint64_t get_HilbertIndex(Point2D point);
+
+	virtual std::vector<Point2D> get_n_closest(Point2D point, uint32_t n);
+	virtual std::vector<Point2D> get_points_in_range(Point2D point, double dist_max);
 
 
 
@@ -37,9 +37,7 @@ private:
 	
 	Node* generateTree();
 
-	void genTreePar(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex, Node* output, uint32_t nbthreads, std::mutex& quadrants_mutex);
-
-	Node* genTree(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex);
+	void genTreePar(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex, Node* output, uint32_t nbthreads);
 
 	uint32_t select_median_x(uint32_t start, uint32_t end);
 	uint32_t select_median_y(uint32_t start, uint32_t end);

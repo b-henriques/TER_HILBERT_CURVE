@@ -3,16 +3,16 @@
 #include "HilbertCurve2D_Adaptive.h"
 #include "HilbertCurve2D_Fixed.h"
 #include <iostream>
-#include <windows.h>
 
 int main(int argc, char* argv[])
 {
 	//16777216 -- order 12 pow(4,2)
-	std::vector<Point2D> points = Point2D::generatePoints(167772160, 0, 0, 10, 10);
+	//std::vector<Point2D> points = Point2D::generatePoints(100, 0, 0, 10, 10);
 
-	/*std::vector<Point2D> points;
+	std::vector<Point2D> points;
+	points.push_back(Point2D(1, 0));
 	points.push_back(Point2D(1, 1));
-	points.push_back(Point2D(1, 2));
+	/*points.push_back(Point2D(1, 2));
 	points.push_back(Point2D(2, 4));
 	points.push_back(Point2D(3, 4));
 	points.push_back(Point2D(1, 4));
@@ -41,8 +41,8 @@ int main(int argc, char* argv[])
 	//}
 	//std::cout << "========================" << std::endl;
 
-	HilbertCurve2D_Fixed hc(points, 12, Point2D(0, 0), Point2D(10, 10), 8);
-	//HilbertCurve2D_Adaptive hc(points, 12, Point2D(0, 0), Point2D(10, 10), 8);
+	//HilbertCurve2D_Fixed hc(points, 15, Point2D(0, 0), Point2D(2, 2), 1);
+	HilbertCurve2D_Adaptive hc(points, 2, Point2D(0, 0), Point2D(10, 10), 8);
 
 	std::cout << std::endl << std::endl;
 	uint32_t x{ 0 };
@@ -60,5 +60,18 @@ int main(int argc, char* argv[])
 	std::cout << "coords_to_mortonindex(uint32_t x, uint32_t y) = " << hc.coords_to_mortonindex(x, y) << std::endl;
 	hc.mortonindex_to_coord(hc.coords_to_mortonindex(x, y), x_unknown, y_unknown);
 	std::cout << "mortonindex_to_coord = (" << x_unknown << "," << y_unknown << ")" << std::endl;
+
+	std::pair<uint64_t, uint64_t> range = hc.get_points_from_hilbertindex(0);
+	std::cout << range.first << "," << range.second << std::endl;
+	
+	std::pair<uint64_t, uint64_t> coords = hc.get_mappedPoint(Point2D(1, 2));
+	std::cout << coords.first << "," << coords.second << std::endl;
+
+	////auto ret = hc.get_n_closest(Point2D(1.5, 1.5), 200);
+	//auto ret = hc.get_points_in_range(Point2D(1.5, 1.5), 1);
+	///*for (auto p : ret) {
+	//	std::cout << "(" << p.getX() << "," << p.getY() << ")"<< std::endl;
+	//}*/
+	//std::cout << ret.size();
 
 }

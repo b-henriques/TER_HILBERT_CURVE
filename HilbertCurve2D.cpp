@@ -3,8 +3,10 @@
 #include <immintrin.h> /*_pdep_u64, _pext_u64*/
 #include <math.h> /*pow*/
 #include <string> 
+#include <utility> /*make_pair*/
 
-HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads): points(_points)
+
+HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads) : points(_points)
 {
 	if (_bl.getX() >= _tr.getX() || _bl.getY() >= _tr.getY())
 	{
@@ -29,7 +31,19 @@ void HilbertCurve2D::checkHilberIndex(uint64_t hi)
 {
 	if (hi > pow(4, order) - 1)
 	{
-		throw std::runtime_error("hilbertindex associated with curve order " + std::to_string(order));
+		throw std::runtime_error("hilbertindex not associated with curve order " + std::to_string(order));
+	}
+}
+
+void HilbertCurve2D::checkPoint(Point2D point)
+{
+	if (point.getX() < bottomLeft.getX() ||
+		point.getX() > topRight.getX() ||
+		point.getY() < bottomLeft.getY() ||
+		point.getY() > topRight.getY()
+		)
+	{
+		throw std::runtime_error("point not in bounding box" + std::to_string(order));
 	}
 }
 
@@ -157,5 +171,17 @@ uint64_t HilbertCurve2D::mortonToHilbert(uint64_t zorder)
 		config = configuration[config][quadrant];
 	}
 	return hilbert;
+}
+
+std::pair<uint64_t, uint64_t> HilbertCurve2D::get_points_from_hilbertindex(uint64_t hilbertindex)
+{
+	checkHilberIndex(hilbertindex);
+
+	if (quadrants.find(hilbertindex) != quadrants.end())
+	{
+		HilbertCurve2D::Quadrant q = quadrants.at(hilbertindex);
+		return std::make_pair(q.start, q.end);
+	}
+	return std::make_pair(1, 0);
 }
 

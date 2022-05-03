@@ -23,8 +23,8 @@ class HilbertCurve2D
 	*
 	* order n => 2^(n) * 2^(n) squares
 	*/
-	/* maximum order = 16, 1d index is an unsigned int(we assume 32 bits) so
-	* (order)*2 = 32 => order = 16
+	/* maximum order = 32, 1d index is an unsigned long long int(we assume 64 bits) so
+	* (order)*2 = 64 => order = 32
 	*/
 public:
 	//gives hilbert index of cell x,y
@@ -42,16 +42,31 @@ public:
 	//gives hilbert index from morton index
 	uint64_t mortonToHilbert(uint64_t zorder);
 
-	virtual Point2D get_mappedPoint(Point2D point) = 0;
-	virtual uint64_t get_MortonIndex(Point2D point) = 0;
-	virtual uint64_t get_HilbertIndex(Point2D point) = 0;
-	virtual std::vector<Point2D> get_points_from_hilbertindex(uint64_t hilbertindex) = 0;
+	//returns pair(start, end) representing range of indexes in array containing points
+	//returns (1,0) if no points associated with hilbertindex
+	std::pair<uint64_t, uint64_t> get_points_from_hilbertindex(uint64_t hilbertindex);
 
-	//TODO:
-	/*
-	* get_n_closest_points(point)
-	* get_points_in_range(point, dist_max)
-	*/
+
+	///////////////////
+	//VIRTUAL METHODS//
+	//////////////////
+
+	//returns pair of mapped coords
+	virtual std::pair<uint32_t, uint32_t> get_mappedPoint(Point2D point) = 0;
+
+	//returns zindex of point
+	virtual uint64_t get_MortonIndex(Point2D point) = 0;
+
+	//returns hilbert index of point
+	virtual uint64_t get_HilbertIndex(Point2D point) = 0;
+
+
+	//SEARCH METHODS//
+	
+	//returns vector of n closest points sorted by dist, user must verify vector size on return as it may not exist enough points
+	virtual std::vector<Point2D> get_n_closest(Point2D point, uint32_t n) = 0;
+	//returns vector of points in range
+	virtual std::vector<Point2D> get_points_in_range(Point2D point, double dist_max) = 0;
 
 	//constructors
 	HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads = 1);
@@ -67,8 +82,8 @@ protected:
 	uint32_t nb_threads;
 
 	struct Quadrant {
-		int start;
-		int end;
+		uint64_t start;
+		uint64_t end;
 
 		Quadrant(int _s, int _e) : start(_s), end(_e) {};
 	};
@@ -76,7 +91,7 @@ protected:
 
 	concurrency::concurrent_unordered_map<uint64_t, Quadrant> quadrants;
 
-
+	void checkPoint(Point2D point);
 	void checkXY(uint32_t x, uint32_t y);
 	void checkHilberIndex(uint64_t hi);
 

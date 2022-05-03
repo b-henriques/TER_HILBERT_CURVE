@@ -1,8 +1,6 @@
 #pragma once
 #include <vector>
 
-
-
 class Point2D
 {
 public:
@@ -13,6 +11,8 @@ public:
 	double getY();
 	void setX(double _x);
 	void setY(double _y);
+
+	double dist(Point2D point);
 
 
 	/// <summary>
