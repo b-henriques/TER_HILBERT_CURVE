@@ -135,7 +135,9 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_n_closest(Point2D point, uint3
 	std::vector<to_search> heap;
 	heap.push_back(to_search{ true, tree.get() });
 
+	uint64_t ii = 0;
 	while (!heap.empty()) {
+		ii++;
 
 		to_search current_element = heap.back();
 		heap.pop_back();
@@ -179,11 +181,11 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_n_closest(Point2D point, uint3
 
 	std::vector<Point2D> ret(n);
 	for (i = n; i > 0; i--) {
-		//std::cout << closest_points.top() << "\n";
 		ret[i - 1] = points[closest_points.top()];
 		closest_points.pop();
 	}
 
+	std::cout << "iiADPT:" << ii << "\n";
 	return ret;
 }
 
@@ -197,9 +199,9 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_points_in_range(Point2D point,
 	};
 	std::vector<to_search> heap;
 	heap.push_back(to_search{ true, tree.get() });
-
+	//uint64_t ii = 0;
 	while (!heap.empty()) {
-
+		//ii++;
 		to_search current_element = heap.back();
 		heap.pop_back();
 		if (!((current_element.node)->leaf))
@@ -232,7 +234,7 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_points_in_range(Point2D point,
 			}
 		}
 	}
-
+	//std::cout << "iiADPT:" << ii << "\n";
 	return ret;
 }
 

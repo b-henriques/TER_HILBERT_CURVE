@@ -3,6 +3,9 @@
 #include <math.h> /*ceil*/
 #include <functional> /*ref*/
 #include<utility> /*make_pair*/
+#include <queue>
+#include <set>
+#include<iostream>
 
 HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads)
 	: HilbertCurve2D(_order, _bl, _tr, _points, _nb_threads)
@@ -39,17 +42,208 @@ std::vector<Point2D> HilbertCurve2D_Fixed::get_n_closest(Point2D point, uint32_t
 {
 	checkPoint(point);
 
-	return std::vector<Point2D>();
+	//maxheap
+	auto cmp = [this, point](uint64_t left, uint64_t right) { return (points[left].dist(point)) < (points[right].dist(point)); };
+	std::priority_queue<uint64_t, std::vector<uint64_t>, decltype(cmp)> closest_points(cmp);
+	std::set<uint64_t> closest_points_set;
+
+	uint64_t hi = get_HilbertIndex(point);
+	auto indexes = get_points_from_hilbertindex(hi);
+	uint64_t i;
+
+	//initialize maxheap with points in quadrant or neighboring quadrants
+	for (i = indexes.first; i < (indexes.second + 1) && closest_points.size() < n; i++)
+	{
+		closest_points.push(i);
+		closest_points_set.insert(i);
+	}
+	bool after = true;
+	while (closest_points.size() < n)
+	{
+		if (indexes.second == (points.size() - 1))
+		{
+			if (indexes.first == 0) return std::vector<Point2D>(points);
+			indexes.first--;
+			closest_points.push(indexes.first);
+			closest_points_set.insert(indexes.first);
+		}
+		else {
+			if (indexes.first == 0 || after) {
+				indexes.second++;
+				closest_points.push(indexes.second);
+				closest_points_set.insert(indexes.second);
+				after = false;
+				continue;
+			}
+			indexes.first--;
+			closest_points.push(indexes.first);
+			closest_points_set.insert(indexes.first);
+			after = true;
+		}
+	}
+	if (indexes.second == (points.size() - 1) && indexes.first == 0) return std::vector<Point2D>(points);
+
+
+	double x_width = topRight.getX() - bottomLeft.getX();
+	double y_width = topRight.getY() - bottomLeft.getY();
+
+	struct to_search {
+		uint64_t zindex;
+		uint32_t level;
+		bool x_axis;
+	};
+	std::vector<to_search> heap;
+	heap.push_back(to_search{ 0, 2, true });
+
+	uint64_t ii = 0;
+	while (!heap.empty()) {
+		ii++;
+		to_search current_element = heap.back();
+		heap.pop_back();
+
+
+		if (current_element.level == pow(2, order + 1)) {
+			uint64_t hi = mortonToHilbert(current_element.zindex);
+			auto indexes = get_points_from_hilbertindex(hi);
+			if (indexes == std::pair<uint64_t, uint64_t>(1, 0)) continue;
+
+			for (uint64_t i = indexes.first; i <= indexes.second; i++)
+			{
+				if (points[i].dist(point) < points[closest_points.top()].dist(point))
+				{
+					if (closest_points_set.find(i) == closest_points_set.end())
+					{
+						closest_points.pop();
+						closest_points.push(i);
+					}
+				}
+			}
+			continue;
+		}
+
+		double dist;
+		uint32_t next_level = current_element.level;
+		uint32_t x, y;
+		uint32_t pos = 1;
+		if (current_element.x_axis)
+		{
+			x = _pext_u64(current_element.zindex, UINT64_C(0x5555555555555555) << 1);
+			if (x) pos = 1 + x * 2;
+			dist = (x_width * pos / current_element.level) - point.getX();
+
+		}
+		else
+		{
+			y = _pext_u64(current_element.zindex, UINT64_C(0x5555555555555555) << 1);
+			if (y) pos = 1 + y * 2;
+			next_level *= 2;
+			dist = (y_width * pos / current_element.level) - point.getY();
+		}
+
+		if (abs(dist) > points[closest_points.top()].dist(point))
+		{
+
+			if (dist < 0)
+			{
+				heap.push_back(to_search{ (current_element.zindex << 1 | 1), next_level, !current_element.x_axis });
+			}
+			else
+			{
+				heap.push_back(to_search{ (current_element.zindex << 1), next_level, !current_element.x_axis });
+			}
+
+		}
+		else {
+			heap.push_back(to_search{ (current_element.zindex << 1 | 1), next_level, !current_element.x_axis });
+			heap.push_back(to_search{ (current_element.zindex << 1), next_level,  !current_element.x_axis });
+		}
+
+	}
+	std::cout << "ii:" << ii << "\n";
+
+	std::vector<Point2D> ret(n);
+	for (i = n; i > 0; i--) {
+		//std::cout << closest_points.top() << "\n";
+		ret[i - 1] = points[closest_points.top()];
+		closest_points.pop();
+	}
+
+	return ret;
 }
 
 std::vector<Point2D> HilbertCurve2D_Fixed::get_points_in_range(Point2D point, double dist_max)
 {
 	checkPoint(point);
 
-	Point2D top, bottom, left, right;
+	std::vector<Point2D> ret;
 
+	double x_width = topRight.getX() - bottomLeft.getX();
+	double y_width = topRight.getY() - bottomLeft.getY();
 
-	return std::vector<Point2D>();
+	struct to_search {
+		uint64_t zindex;
+		uint32_t level;
+		bool x_axis;
+	};
+	std::vector<to_search> heap;
+	heap.push_back(to_search{ 0, 2, true });
+	//uint64_t ii = 0;
+	while (!heap.empty()) {
+		//ii++;
+		to_search current_element = heap.back();
+		heap.pop_back();
+		if (current_element.level == pow(2, order + 1)) {
+			uint64_t hi = mortonToHilbert(current_element.zindex);
+			auto indexes = get_points_from_hilbertindex(hi);
+			if (indexes == std::pair<uint64_t, uint64_t>(1, 0)) continue;
+
+			for (uint64_t i = indexes.first; i <= indexes.second; i++)
+			{
+				if (points[i].dist(point) < dist_max) ret.push_back(points[i]);
+			}
+			continue;
+		}
+
+		double dist;
+		uint32_t next_level = current_element.level;
+		uint32_t x, y;
+		uint32_t pos = 1;
+		if (current_element.x_axis)
+		{
+			x = _pext_u64(current_element.zindex, UINT64_C(0x5555555555555555) << 1);
+			if (x) pos = 1 + x * 2;
+			dist = (x_width * pos / current_element.level) - point.getX();
+
+		}
+		else
+		{
+			y = _pext_u64(current_element.zindex, UINT64_C(0x5555555555555555) << 1);
+			if (y) pos = 1 + y * 2;
+			next_level *= 2;
+			dist = (y_width * pos / current_element.level) - point.getY();
+		}
+
+		if (abs(dist) > dist_max)
+		{
+
+			if (dist < 0)
+			{
+				heap.push_back(to_search{ (current_element.zindex << 1 | 1), next_level, !current_element.x_axis });
+			}
+			else
+			{
+				heap.push_back(to_search{ (current_element.zindex << 1), next_level, !current_element.x_axis });
+			}
+
+		}
+		else {
+			heap.push_back(to_search{ (current_element.zindex << 1 | 1), next_level, !current_element.x_axis });
+			heap.push_back(to_search{ (current_element.zindex << 1), next_level,  !current_element.x_axis });
+		}
+
+	}
+	//std::cout << "ii:" << ii << "\n";
+	return ret;
 }
 
 double HilbertCurve2D_Fixed::calulateFactor(double vmin, double vmax, int k)
