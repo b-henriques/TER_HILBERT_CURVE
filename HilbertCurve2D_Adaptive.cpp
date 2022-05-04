@@ -10,7 +10,7 @@
 #include <set>
 #include<iostream>
 
-HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads) : HilbertCurve2D(_order, _bl, _tr, _points, _nb_threads)
+HilbertCurve2D_Adaptive::HilbertCurve2D_Adaptive(std::vector<Point2D>& _points, uint32_t _order, double _x_max, double _y_max, uint32_t _nb_threads) : HilbertCurve2D(_order, _x_max, _y_max, _points, _nb_threads)
 {
 	tree = std::unique_ptr<Node>(generateTree());
 	//std::cout << "\t hi \t start \t end\n";
@@ -135,9 +135,9 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_n_closest(Point2D point, uint3
 	std::vector<to_search> heap;
 	heap.push_back(to_search{ true, tree.get() });
 
-	uint64_t ii = 0;
+	//uint64_t ii = 0;
 	while (!heap.empty()) {
-		ii++;
+		//ii++;
 
 		to_search current_element = heap.back();
 		heap.pop_back();
@@ -185,7 +185,7 @@ std::vector<Point2D> HilbertCurve2D_Adaptive::get_n_closest(Point2D point, uint3
 		closest_points.pop();
 	}
 
-	std::cout << "iiADPT:" << ii << "\n";
+	//std::cout << "iiADPT:" << ii << "\n";
 	return ret;
 }
 

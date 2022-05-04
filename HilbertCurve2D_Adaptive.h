@@ -8,7 +8,7 @@
 class HilbertCurve2D_Adaptive : public HilbertCurve2D
 {
 public:
-	HilbertCurve2D_Adaptive(std::vector<Point2D> &_points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads = 1);
+	HilbertCurve2D_Adaptive(std::vector<Point2D> &_points, uint32_t _order, double _x_max, double _y_max, uint32_t _nb_threads = 1);
 
 	virtual std::pair<uint32_t, uint32_t> get_mappedPoint(Point2D point);
 	virtual uint64_t get_MortonIndex(Point2D point);

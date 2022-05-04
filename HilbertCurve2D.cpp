@@ -6,15 +6,15 @@
 #include <utility> /*make_pair*/
 
 
-HilbertCurve2D::HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads) : points(_points)
+HilbertCurve2D::HilbertCurve2D(uint32_t _order, double _x_max, double _y_max, std::vector<Point2D>& _points, uint32_t _nb_threads) : points(_points)
 {
-	if (_bl.getX() >= _tr.getX() || _bl.getY() >= _tr.getY())
+	if (_x_max<=0 || _y_max <= 0)
 	{
 		throw std::runtime_error("illformed bounding-box: bottomleft point shoud be < to topright point");
 	}
 	order = _order;
-	bottomLeft = _bl;
-	topRight = _tr;
+	x_max = _x_max;
+	y_max = _y_max;
 	nb_threads = _nb_threads;
 }
 
@@ -37,10 +37,10 @@ void HilbertCurve2D::checkHilberIndex(uint64_t hi)
 
 void HilbertCurve2D::checkPoint(Point2D point)
 {
-	if (point.getX() < bottomLeft.getX() ||
-		point.getX() > topRight.getX() ||
-		point.getY() < bottomLeft.getY() ||
-		point.getY() > topRight.getY()
+	if (point.getX() < 0 ||
+		point.getX() > x_max ||
+		point.getY() < 0 ||
+		point.getY() > y_max
 		)
 	{
 		throw std::runtime_error("point not in bounding box" + std::to_string(order));

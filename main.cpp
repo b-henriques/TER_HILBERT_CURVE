@@ -2,12 +2,26 @@
 #include "Point2D.h"
 #include "HilbertCurve2D_Adaptive.h"
 #include "HilbertCurve2D_Fixed.h"
+#include "PointsGeneratorBuilder.h"
 #include <iostream>
 
 int main(int argc, char* argv[])
 {
 	//16777216 -- order 12 pow(4,2)
-	std::vector<Point2D> points = Point2D::generatePoints(167772160, 0, 0, 10, 10);
+	std::vector<Point2D> points;
+	PointsGeneratorBuilder genb;
+	std::pair<std::vector<double>, std::vector<double>> x_params({ 0.0, 2.0, 4.0, 10.0 }, { 10.0, 1.0, 10.0 });
+	std::pair<std::vector<double>, std::vector<double>> y_params({ 0.0, 2.0, 4.0, 10.0 }, { 10.0, 1.0, 10.0 });
+	auto gen = genb.mk_piecewise_constant(x_params, y_params);
+	//UniformPointsGenerator gen(10, 10);
+	//GammaPointsGenerator gen(10, 10, 15, 1.0, 4.0, 1.0);
+	/*PiecewiseConstantPointsGenerator gen(
+		{ 0.0, 2.0, 4.0, 10.0 }, { 10.0, 1.0, 10.0 },
+		{ 0.0, 2.0, 4.0, 10.0 }, { 10.0, 1.0, 10.0 }
+	);*/
+	points = gen.generatePoints(167772160, 8);
+	std::cout << "Points generated\n";
+	//std::vector<Point2D> points = Point2D::generatePoints(167772160, 0, 0, 10, 10);
 	std::vector<Point2D> points2(points);
 	//std::vector<Point2D> points;
 	/*points.push_back(Point2D(1, 1));
@@ -37,14 +51,15 @@ int main(int argc, char* argv[])
 	points.push_back(Point2D(10, 0));
 	points.push_back(Point2D(10, 1));*/
 
-	//for (auto p : points)
-	//{
-	//	std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
-	//}
-	//std::cout << "========================" << std::endl;
+	/*for (auto p : points)
+	{
+		std::cout << "(" << p.getX() << "," << p.getY() << ")" << std::endl;
+	}
+	std::cout << "========================" << std::endl;*/
+	//return 0;
 
-	HilbertCurve2D_Fixed hc(points2, 12, Point2D(0, 0), Point2D(10, 10), 8);
-	HilbertCurve2D_Adaptive hc2(points, 12, Point2D(0, 0), Point2D(10, 10), 8);
+	HilbertCurve2D_Fixed hc(points2, 12, 10, 10, 8);
+	HilbertCurve2D_Adaptive hc2(points, 12, 10, 10, 8);
 
 	std::cout << std::endl << std::endl;
 	uint32_t x{ 0 };
@@ -65,7 +80,7 @@ int main(int argc, char* argv[])
 
 	std::pair<uint64_t, uint64_t> range = hc.get_points_from_hilbertindex(0);
 	std::cout << range.first << "," << range.second << std::endl;
-	
+
 	std::pair<uint64_t, uint64_t> coords = hc.get_mappedPoint(Point2D(1.0000001, 2));
 	std::cout << coords.first << "," << coords.second << std::endl;
 
@@ -73,15 +88,15 @@ int main(int argc, char* argv[])
 	auto ret = hc.get_n_closest(Point2D(1.5, 1.5), 2);
 	//auto ret = hc.get_points_in_range(Point2D(9.5, 3.5), 0.05);
 	for (auto p : ret) {
-		std::cout << "(" << p.getX() << "," << p.getY() << ")"/*<< p.dist(Point2D(3.5, 3.5))*/ << std::endl;
+		std::cout << "(" << p.getX() << "," << p.getY() << ")" << p.dist(Point2D(1.5, 1.5)) << std::endl;
 	}
 	std::cout << ret.size() << "\n";
 
 	//ret = hc2.get_points_in_range(Point2D(9.5, 3.5), 0.05);
 	ret = hc2.get_n_closest(Point2D(1.5, 1.5), 2);
 	for (auto p : ret) {
-		std::cout << "(" << p.getX() << "," << p.getY() << ")" /*<< p.dist(Point2D(3.5, 3.5))*/ << std::endl;
+		std::cout << "(" << p.getX() << "," << p.getY() << ")" << p.dist(Point2D(1.5, 1.5)) << std::endl;
 	}
-	std::cout << ret.size()<<"\n";
+	std::cout << ret.size() << "\n";
 
 }

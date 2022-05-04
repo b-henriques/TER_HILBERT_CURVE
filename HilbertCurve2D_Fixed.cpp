@@ -7,11 +7,11 @@
 #include <set>
 #include<iostream>
 
-HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, Point2D _bl, Point2D _tr, uint32_t _nb_threads)
-	: HilbertCurve2D(_order, _bl, _tr, _points, _nb_threads)
+HilbertCurve2D_Fixed::HilbertCurve2D_Fixed(std::vector<Point2D>& _points, uint32_t _order, double _x_max, double _y_max, uint32_t _nb_threads)
+	: HilbertCurve2D(_order, _x_max, _y_max, _points, _nb_threads)
 {
-	x_factor = calulateFactor(bottomLeft.getX(), topRight.getX(), order);
-	y_factor = calulateFactor(bottomLeft.getY(), topRight.getY(), order);
+	x_factor = calulateFactor(0, _x_max, order);
+	y_factor = calulateFactor(0, _y_max, order);
 
 	generateCurve();
 }
@@ -84,8 +84,8 @@ std::vector<Point2D> HilbertCurve2D_Fixed::get_n_closest(Point2D point, uint32_t
 	if (indexes.second == (points.size() - 1) && indexes.first == 0) return std::vector<Point2D>(points);
 
 
-	double x_width = topRight.getX() - bottomLeft.getX();
-	double y_width = topRight.getY() - bottomLeft.getY();
+	double x_width = x_max;
+	double y_width = y_max;
 
 	struct to_search {
 		uint64_t zindex;
@@ -95,9 +95,9 @@ std::vector<Point2D> HilbertCurve2D_Fixed::get_n_closest(Point2D point, uint32_t
 	std::vector<to_search> heap;
 	heap.push_back(to_search{ 0, 2, true });
 
-	uint64_t ii = 0;
+	//uint64_t ii = 0;
 	while (!heap.empty()) {
-		ii++;
+		//ii++;
 		to_search current_element = heap.back();
 		heap.pop_back();
 
@@ -159,7 +159,7 @@ std::vector<Point2D> HilbertCurve2D_Fixed::get_n_closest(Point2D point, uint32_t
 		}
 
 	}
-	std::cout << "ii:" << ii << "\n";
+	//std::cout << "ii:" << ii << "\n";
 
 	std::vector<Point2D> ret(n);
 	for (i = n; i > 0; i--) {
@@ -177,8 +177,8 @@ std::vector<Point2D> HilbertCurve2D_Fixed::get_points_in_range(Point2D point, do
 
 	std::vector<Point2D> ret;
 
-	double x_width = topRight.getX() - bottomLeft.getX();
-	double y_width = topRight.getY() - bottomLeft.getY();
+	double x_width = x_max;
+	double y_width = y_max;
 
 	struct to_search {
 		uint64_t zindex;
@@ -261,8 +261,8 @@ double HilbertCurve2D_Fixed::calulateFactor(double vmin, double vmax, int k)
 
 void HilbertCurve2D_Fixed::mapCellXY(Point2D point, uint32_t& x, uint32_t& y)
 {
-	x = (point.getX() - bottomLeft.getX()) * x_factor;
-	y = (point.getY() - bottomLeft.getY()) * y_factor;
+	x = (point.getX()) * x_factor;
+	y = (point.getY()) * y_factor;
 }
 
 void HilbertCurve2D_Fixed::mapPoints2HilbertIndex(uint64_t start, uint64_t end, std::vector<Quadrants_info>& quadrants_info, std::vector<uint64_t>& hi_map)

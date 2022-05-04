@@ -69,15 +69,15 @@ public:
 	virtual std::vector<Point2D> get_points_in_range(Point2D point, double dist_max) = 0;
 
 	//constructors
-	HilbertCurve2D(uint32_t _order, Point2D _bl, Point2D _tr, std::vector<Point2D>& _points, uint32_t _nb_threads = 1);
+	HilbertCurve2D(uint32_t _order, double _x_max, double _y_max, std::vector<Point2D>& _points, uint32_t _nb_threads = 1);
 	//destructor
 	~HilbertCurve2D() = default;
 
 
 protected:
 	uint32_t order{ 1 };
-	Point2D bottomLeft{ 0,0 };
-	Point2D topRight{ 10, 10 };
+	double x_max{10.0};
+	double y_max{ 10.0 };
 	std::vector<Point2D>& points;
 	uint32_t nb_threads;
 

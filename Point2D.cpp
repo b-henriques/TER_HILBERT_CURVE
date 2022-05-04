@@ -31,18 +31,3 @@ double Point2D::dist(Point2D point)
 		* 1.0 /*implicit conversion to double*/
 	);
 }
-
-std::vector<Point2D> Point2D::generatePoints(int n_points, double x_min, double y_min, double x_max, double y_max)
-{
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	std::default_random_engine generator(seed);
-	std::uniform_real_distribution<double> distributionX(x_min, x_max);
-	std::uniform_real_distribution<double> distributionY(y_min, y_max);
-
-	std::vector<Point2D> vec(n_points);
-	for (int i = 0; i < n_points; i++)
-	{
-		vec[i] = Point2D(distributionX(generator), distributionY(generator));
-	}
-	return vec;
-}
