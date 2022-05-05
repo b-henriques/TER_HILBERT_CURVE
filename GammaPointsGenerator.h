@@ -1,5 +1,5 @@
 #pragma once
-#include "UniformPointsGenerator.h"
+#include "PointsGenerator.h"
 #include <random>
 
 

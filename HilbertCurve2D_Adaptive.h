@@ -2,13 +2,13 @@
 #include "Point2D.h"
 #include "HilbertCurve2D.h"
 #include <memory> /*unique_ptr*/
-
+#include<iostream>
 
 
 class HilbertCurve2D_Adaptive : public HilbertCurve2D
 {
 public:
-	HilbertCurve2D_Adaptive(std::vector<Point2D> &_points, uint32_t _order, double _x_max, double _y_max, uint32_t _nb_threads = 1);
+	HilbertCurve2D_Adaptive(std::vector<Point2D>& _points, uint32_t _order, double _x_max, double _y_max, uint32_t _nb_threads = 1);
 
 	virtual std::pair<uint32_t, uint32_t> get_mappedPoint(Point2D point);
 	virtual uint64_t get_MortonIndex(Point2D point);
@@ -34,14 +34,14 @@ private:
 
 	std::unique_ptr<Node> tree;
 
-	
+
 	Node* generateTree();
 
 	void genTreePar(uint32_t start, uint32_t end, uint32_t level, uint64_t zindex, Node* output, uint32_t nbthreads);
 
 	uint32_t select_median_x(uint32_t start, uint32_t end);
 	uint32_t select_median_y(uint32_t start, uint32_t end);
-	
+
 	uint64_t get_quadrant_index(Point2D point);
 
 };

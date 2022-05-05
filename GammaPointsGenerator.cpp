@@ -4,7 +4,7 @@
 
 GammaPointsGenerator::GammaPointsGenerator(double _max_x, double _max_y, double a_x, double b_x, double a_y, double b_y) : PointsGenerator()
 {
-	
+
 	distributionX = std::gamma_distribution<double>(a_x, b_x);
 	distributionY = std::gamma_distribution<double>(a_y, b_y);
 	max_x = _max_x;
@@ -19,11 +19,13 @@ std::vector<Point2D> GammaPointsGenerator::generatePoints(uint64_t n, unsigned i
 		std::vector<std::gamma_distribution<double>> disty;
 		std::vector<std::default_random_engine> gen;
 
+		unsigned seed;
 		for (unsigned int i = 1; i < nthreads; i++)
 		{
+			seed = std::chrono::system_clock::now().time_since_epoch().count() + i;
 			distx.push_back(std::gamma_distribution<double>(distributionX));
 			disty.push_back(std::gamma_distribution<double>(distributionY));
-			gen.push_back(std::default_random_engine(generator));
+			gen.push_back(std::default_random_engine(seed));
 		}
 
 		std::vector<std::thread> threads;

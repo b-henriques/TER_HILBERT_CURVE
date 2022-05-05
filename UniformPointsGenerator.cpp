@@ -10,8 +10,8 @@ UniformPointsGenerator::UniformPointsGenerator(double _x_max, double _y_max) : P
 		throw std::runtime_error("x, y values must be > 0");
 	}
 
-	distributionX = std::uniform_real_distribution<double> (0, _x_max);
-	distributionY = std::uniform_real_distribution<double> (0, _y_max);
+	distributionX = std::uniform_real_distribution<double>(0, _x_max);
+	distributionY = std::uniform_real_distribution<double>(0, _y_max);
 }
 
 std::vector<Point2D> UniformPointsGenerator::generatePoints(uint64_t n, unsigned int nthreads)
@@ -22,21 +22,23 @@ std::vector<Point2D> UniformPointsGenerator::generatePoints(uint64_t n, unsigned
 		std::vector<std::uniform_real_distribution<double>> disty;
 		std::vector<std::default_random_engine> gen;
 
+		unsigned seed;
 		for (unsigned int i = 1; i < nthreads; i++)
 		{
+			seed = std::chrono::system_clock::now().time_since_epoch().count() + i;
 			distx.push_back(std::uniform_real_distribution<double>(distributionX));
 			disty.push_back(std::uniform_real_distribution<double>(distributionY));
-			gen.push_back(std::default_random_engine(generator));
+			gen.push_back(std::default_random_engine(seed));
 		}
 
 		std::vector<std::thread> threads;
 		uint64_t points_interval = n / nthreads;
-		for (unsigned int t = 0; t < nthreads-1; t++)
+		for (unsigned int t = 0; t < nthreads - 1; t++)
 		{
 			uint64_t start = t * points_interval;
 			uint64_t end = (t + 1) * points_interval;
 			threads.push_back(
-				std::thread(&UniformPointsGenerator::genPoints, this, 
+				std::thread(&UniformPointsGenerator::genPoints, this,
 					std::ref(vec),
 					start, end,
 					std::ref(distx[t]),
@@ -51,7 +53,7 @@ std::vector<Point2D> UniformPointsGenerator::generatePoints(uint64_t n, unsigned
 			vec[i] = Point2D(distributionX(generator), distributionY(generator));
 		}
 
-		for (unsigned int t = 0; t < nthreads-1; t++)
+		for (unsigned int t = 0; t < nthreads - 1; t++)
 		{
 			threads[t].join();
 		}

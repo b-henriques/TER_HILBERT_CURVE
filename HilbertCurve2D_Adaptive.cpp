@@ -42,9 +42,12 @@ uint64_t HilbertCurve2D_Adaptive::get_MortonIndex(Point2D point)
 	checkPoint(point);
 	uint64_t zindex = 0;
 	uint64_t level = 0;
+
 	Node* node = tree.get();
-	while (!node->leaf) {
-		if (!level % 2) {
+
+	while (!(node->leaf)) {
+
+		if (!(level % 2)) {
 			if (point.getX() > node->value)
 			{
 				node = (node->right).get();
@@ -85,7 +88,6 @@ uint64_t HilbertCurve2D_Adaptive::get_HilbertIndex(Point2D point)
 std::vector<Point2D> HilbertCurve2D_Adaptive::get_n_closest(Point2D point, uint32_t n)
 {
 	checkPoint(point);
-
 	//maxheap
 	auto cmp = [this, point](uint64_t left, uint64_t right) { return (points[left].dist(point)) < (points[right].dist(point)); };
 	std::priority_queue<uint64_t, std::vector<uint64_t>, decltype(cmp)> closest_points(cmp);

@@ -16,11 +16,13 @@ std::vector<Point2D> PiecewiseConstantPointsGenerator::generatePoints(uint64_t n
 		std::vector<std::piecewise_constant_distribution<double>> disty;
 		std::vector<std::default_random_engine> gen;
 
+		unsigned seed;
 		for (unsigned int i = 1; i < nthreads; i++)
 		{
+			seed = std::chrono::system_clock::now().time_since_epoch().count() + i;
 			distx.push_back(std::piecewise_constant_distribution<double>(distributionX));
 			disty.push_back(std::piecewise_constant_distribution<double>(distributionY));
-			gen.push_back(std::default_random_engine(generator));
+			gen.push_back(std::default_random_engine(seed));
 		}
 
 		std::vector<std::thread> threads;
