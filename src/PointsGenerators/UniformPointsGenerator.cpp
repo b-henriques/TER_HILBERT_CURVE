@@ -25,7 +25,7 @@ std::vector<Point2D> UniformPointsGenerator::generatePoints(uint64_t n, unsigned
 		unsigned seed;
 		for (unsigned int i = 1; i < nthreads; i++)
 		{
-			seed = std::chrono::system_clock::now().time_since_epoch().count() + i;
+			seed = std::chrono::system_clock::now().time_since_epoch().count() + i*100;
 			distx.push_back(std::uniform_real_distribution<double>(distributionX));
 			disty.push_back(std::uniform_real_distribution<double>(distributionY));
 			gen.push_back(std::default_random_engine(seed));

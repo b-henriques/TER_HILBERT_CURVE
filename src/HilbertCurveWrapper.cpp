@@ -18,7 +18,6 @@ PYBIND11_MODULE(pyHilbertCurve, m) {
 
 	py::bind_vector<std::vector<Point2D>>(m, "VectorPoint2D");
 
-
 	/*POINT*/
 	py::class_<Point2D>(m, "Point2D")
 		.def(py::init<double, double>())
