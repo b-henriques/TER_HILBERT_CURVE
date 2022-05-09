@@ -4,14 +4,20 @@
 #include <HilbertCurve2D_Adaptive.h>
 #include <HilbertCurve2D_Fixed.h>
 #include <HilbertCurve2D.h>
+
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
+#include <pybind11/stl_bind.h>
 
 
 namespace py = pybind11;
 
+PYBIND11_MAKE_OPAQUE(std::vector<Point2D>);
 
 PYBIND11_MODULE(pyHilbertCurve, m) {
+
+	py::bind_vector<std::vector<Point2D>>(m, "VectorPoint2D");
+
 
 	/*POINT*/
 	py::class_<Point2D>(m, "Point2D")
